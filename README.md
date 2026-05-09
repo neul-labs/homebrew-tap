@@ -6,17 +6,17 @@ Homebrew tap for [neul-labs](https://github.com/neul-labs) tools.
 
 ```bash
 brew tap neul-labs/tap
-brew install stkd
+brew install rjest
 ```
 
 ## Available Formulae
 
-- **stkd** - CLI for managing stacked pull requests on GitHub and GitLab
+- **rjest** - A blazing-fast Jest-compatible test runner written in Rust
 - **rninja** - A drop-in replacement for Ninja build system with caching and improved scheduling
 
 ## Updating
 
 ```bash
 brew update
-brew upgrade stkd
+brew upgrade rjest
 ```

@@ -6,7 +6,6 @@ class Stkd < Formula
 
   on_macos do
     if Hardware::CPU.intel?
-      # No prebuilt x86_64 macOS binary yet; build from source
       url "https://github.com/neul-labs/stkd/archive/refs/tags/v0.1.0.tar.gz"
       sha256 "55388226fea1817eebcd89f4c3c1207d12096b11b0d857ef04a7b383817ad1c4"
     else
