@@ -1,0 +1,57 @@
+name: Update m9m Formula
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'm9m version to release (e.g., 0.2.1)'
+        required: true
+        type: string
+
+jobs:
+  update-formula:
+    name: Update Homebrew Formula
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout homebrew-tap repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update formula
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          BASE_URL="https://github.com/neul-labs/m9m/releases/download/v${VERSION}"
+
+          # Update version
+          sed -i "s/version \".*\"/version \"$VERSION\"/" Formula/m9m.rb
+
+          # Update URLs and SHA256s for all platforms
+          for platform in darwin-amd64 darwin-arm64 linux-amd64 linux-arm64; do
+            # Download SHA256 checksum file
+            curl -sSL "${BASE_URL}/m9m-${platform}.sha256" -o "${platform}.sha256"
+            SHA256=$(cut -d' ' -f1 "${platform}.sha256")
+
+            # Update URL
+            sed -i "s|https://github.com/neul-labs/m9m/releases/download/v[^/\\\"]*/m9m-${platform}|https://github.com/neul-labs/m9m/releases/download/v${VERSION}/m9m-${platform}|g" Formula/m9m.rb
+
+            # Update SHA256 (line immediately following the URL for this platform)
+            sed -i "/m9m-${platform}\"\)/!b;n;s/sha256 \".*\"/sha256 \"${SHA256}\"/" Formula/m9m.rb
+          done
+
+          rm -f *.sha256
+
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add Formula/m9m.rb
+          if git diff --cached --quiet; then
+            echo "No formula changes to commit"
+            exit 0
+          fi
+          git commit -m "Update m9m to v${{ github.event.inputs.version }}"
+          git push
